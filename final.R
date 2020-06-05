@@ -1,6 +1,7 @@
 library(InformationValue)
 online <- read.csv( "online_shoppers_intention.csv")
 str(online)
+online$Revenue = as.numeric(online$Revenue)
 # M = cor(online[,1:10])
 # library(corrplot) # for correlation plot, install if needed
 # corrplot(M, method = "number" , number.cex = .7 )
@@ -52,11 +53,12 @@ for(i in 1:5){
   
   prob_logit <- predict(model_logit , test_data1 , type="response" )
   optCutOff <- optimalCutoff(actuals = test_data1$Revenue , predictedScores = prob_logit)[1]
-  prob_logit = ifelse(prob_logit>optCutOff , 1 ,0)
+
+  prob_logit = cut(prob_logit, breaks=c(-Inf, optCutOff, Inf), labels=c("0", "1"))
   matrix = table(prob_logit ,test_data1$Revenue)
   acu[i] <-     (matrix[1,1]+matrix[2,2])/sum(matrix)
-  pre[i] <-     matrix[1,1]/(sum(matrix[1,]))
-  recall[i] <-  matrix[1,1]/(sum(matrix[,1]))
+  pre[i] <-     matrix[2,2]/(sum(matrix[2,]))
+  recall[i] <-  matrix[2,2]/(sum(matrix[,2]))
   spe[i] <-     matrix[2,2]/(sum(matrix[,2]))
 }
 output_logit <- data.frame(
@@ -95,8 +97,8 @@ for(i in 1:5){
   prob_rd = ifelse(prob_rd>optCutOff , 1 ,0)
   matrix = table(prob_rd ,test_data2$Revenue)
   acu[i] <-     (matrix[1,1]+matrix[2,2])/sum(matrix)
-  pre[i] <-     matrix[1,1]/(sum(matrix[1,]))
-  recall[i] <-  matrix[1,1]/(sum(matrix[,1]))
+  pre[i] <-     matrix[2,2]/(sum(matrix[2,]))
+  recall[i] <-  matrix[2,2]/(sum(matrix[,2]))
   spe[i] <-     matrix[2,2]/(sum(matrix[,2]))
 }
 output_rd <- data.frame(
@@ -131,9 +133,9 @@ for(i in 1:5){
   prob_tree <- predict(object = model_tree , newdata = test_data3, type = "class")
   matrix = table(prob_tree ,test_data3$Revenue)
   acu[i] <-     (matrix[1,1]+matrix[2,2])/sum(matrix)
-  pre[i] <-     matrix[1,1]/(sum(matrix[1,]))
-  recall[i] <-  matrix[1,1]/(sum(matrix[,1]))
-  spe[i] <-     matrix[2,2]/(sum(matrix[,2]))
+  pre[i] <-     matrix[2,2]/(sum(matrix[2,]))
+  recall[i] <-  matrix[2,2]/(sum(matrix[,2]))
+  spe[i] <-     matrix[1,1]/(sum(matrix[,1]))
 }
 output_tree <- data.frame(
   accuracy = acu,
